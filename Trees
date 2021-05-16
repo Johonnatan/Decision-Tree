@@ -1,0 +1,53 @@
+rm(list=ls(all=TRUE)) #Remove objetos da memória do R
+
+#Instala bibliotecas necessarias
+install.packages('mlbench') #biblioteca mlbench disponibiliza varios conjunto de dados, incluindo o Pima Indians Diabetes
+install.packages('caret',dependencies = TRUE) #biblioteca que tem enorme quantidade de ferramentas e algoritmos para trabalhar com machine learning
+install.packages('rpart') #rpart traz o algoritmo de arvore de decisao
+install.packages('rpart.plot') #o rpart.plot serve para visualizar a arvore de decisao gerado pelo rpart
+
+#Carrega as bibliotecas
+library(mlbench)
+library(caret)
+library(rpart)
+library(rpart.plot)
+
+#Armazena o conjunto de dados PimaIndiansDiabetes em um data frame com o nome dados
+dados <- PimaIndiansDiabetes
+
+#visualiza a media (mean) e outras estatisticas descritivas das variaveis
+summary(dados)
+
+#Separa conjunto de dados para treino e teste para hold-out
+index <- createDataPartition(dados$diabetes, #Variavel resposta
+                             p = 0.8, #Definir percentual para treino
+                             list = F #Manter list = F
+)
+treino <- dados[index,]
+teste <- dados[-index,]
+
+#Planta a seamente
+set.seed(1)
+
+####--- Treina arvore de decisao
+arvore_model <- train(diabetes ~ .,
+                      data = treino,
+                      method = "rpart",
+                      control = rpart.control(
+                        minsplit = 5, #Qtde minima de linhas em cada nó
+                        minbucket = 5, #Qtde minima de linhas em cada nó terminal
+                        maxdepth =25)) #Profundidade maxima que a arvore pode crescer
+
+#Visualiza resumo do treinamento
+arvore_model 
+
+#Visualiza arvore de decisao
+rpart.plot(arvore_model$finalModel , cex = 0.9)
+
+#A partir do algoritmo treinado, faz predicao nos dados separados para teste
+predicoes_arvore <- predict(arvore_model, newdata = teste)
+
+#Visualiza matriz de confusao
+confusionMatrix(predicoes_arvore,
+                teste$diabetes,
+                positive = 'pos')
