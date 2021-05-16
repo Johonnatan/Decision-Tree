@@ -16,7 +16,7 @@ library(rpart.plot)
 #Carrega o conjunto de dados PimaIndiansDiabetes na memoria do R
 data(PimaIndiansDiabetes)
 
-#Armazena o conjunto de dados PimaIndiansDiabetes em um data frame com o nome dados
+#Armazena o conjunto de dados PimaIndiansDiabetes em um data frame
 dataframe <- PimaIndiansDiabetes
 
 #visualiza as estatisticas descritivas das variaveis do conjunto de dados
@@ -32,7 +32,7 @@ conjunto <- createDataPartition(dataframe$diabetes, #Variavel resposta do conjun
 base_treino <- dataframe[conjunto,]
 base_teste <- dataframe[-conjunto,]
 
-#Planta a seamente
+#Planta a semente
 set.seed(1)
 
 #Treinar algoritmo de árvore de decisao com profundidade 25
