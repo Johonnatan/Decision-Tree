@@ -12,6 +12,9 @@ library(caret)
 library(rpart)
 library(rpart.plot)
 
+#Carrega o conjunto de dados na memoria do R
+data(PimaIndiansDiabetes)
+
 #Armazena o conjunto de dados PimaIndiansDiabetes em um data frame com o nome dados
 dados <- PimaIndiansDiabetes
 
