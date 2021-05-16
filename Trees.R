@@ -1,10 +1,11 @@
-rm(list=ls(all=TRUE)) #Remove objetos da memória do R
+#Remove objetos da memória do R
+rm(list=ls(all=TRUE))
 
-#Instala bibliotecas necessarias
-install.packages('mlbench') #biblioteca mlbench disponibiliza varios conjunto de dados, incluindo o Pima Indians Diabetes
-install.packages('caret',dependencies = TRUE) #biblioteca que tem enorme quantidade de ferramentas e algoritmos para trabalhar com machine learning
-install.packages('rpart') #rpart traz o algoritmo de arvore de decisao
-install.packages('rpart.plot') #o rpart.plot serve para visualizar a arvore de decisao gerado pelo rpart
+#Instala bibliotecas
+install.packages('mlbench') #biblioteca com conjunto de dados Pima Indians Diabetes
+install.packages('caret',dependencies = TRUE) #biblioteca para trabalhar com machine learning
+install.packages('rpart') #rpart traz o algoritmo decision tree
+install.packages('rpart.plot') #visualizar a arvore de decisao
 
 #Carrega as bibliotecas
 library(mlbench)
@@ -12,45 +13,47 @@ library(caret)
 library(rpart)
 library(rpart.plot)
 
-#Carrega o conjunto de dados na memoria do R
+#Carrega o conjunto de dados PimaIndiansDiabetes na memoria do R
 data(PimaIndiansDiabetes)
 
 #Armazena o conjunto de dados PimaIndiansDiabetes em um data frame com o nome dados
-dados <- PimaIndiansDiabetes
+dataframe <- PimaIndiansDiabetes
 
-#visualiza a media (mean) e outras estatisticas descritivas das variaveis
-summary(dados)
+#visualiza as estatisticas descritivas das variaveis do conjunto de dados
+summary(dataframe)
 
-#Separa conjunto de dados para treino e teste para hold-out
-index <- createDataPartition(dados$diabetes, #Variavel resposta
-                             p = 0.8, #Definir percentual para treino
-                             list = F #Manter list = F
+#Separa conjunto de dados para treino e teste no método de hold-out
+conjunto <- createDataPartition(dataframe$diabetes, #Variavel resposta do conjunto de dados
+                                p = 0.8, #Definir percentual para treino em 80%
+                                list = F #Manter lista
 )
-treino <- dados[index,]
-teste <- dados[-index,]
+
+#Separa as bases de teste e treino para o modelo preditivo
+base_treino <- dataframe[conjunto,]
+base_teste <- dataframe[-conjunto,]
 
 #Planta a seamente
 set.seed(1)
 
-####--- Treina arvore de decisao
-arvore_model <- train(diabetes ~ .,
-                      data = treino,
-                      method = "rpart",
-                      control = rpart.control(
-                        minsplit = 5, #Qtde minima de linhas em cada nó
-                        minbucket = 5, #Qtde minima de linhas em cada nó terminal
-                        maxdepth =25)) #Profundidade maxima que a arvore pode crescer
+#Treinar algoritmo de árvore de decisao com profundidade 25
+arvore <- train(diabetes ~ .,
+                data = base_treino,
+                method = "rpart",
+                control = rpart.control(
+                  minsplit = 5, 
+                  minbucket = 5,
+                  maxdepth =25)) 
 
-#Visualiza resumo do treinamento
-arvore_model 
+#Visualiza resumo do treinamento do modelo
+arvore
 
 #Visualiza arvore de decisao
-rpart.plot(arvore_model$finalModel , cex = 0.9)
+rpart.plot(arvore$finalModel , cex = 0.9)
 
-#A partir do algoritmo treinado, faz predicao nos dados separados para teste
-predicoes_arvore <- predict(arvore_model, newdata = teste)
+#Realizar predicao nos dados separados para teste
+predicoes <- predict(arvore, newdata = base_teste)
 
 #Visualiza matriz de confusao
-confusionMatrix(predicoes_arvore,
-                teste$diabetes,
+confusionMatrix(predicoes,
+                base_teste$diabetes,
                 positive = 'pos')
